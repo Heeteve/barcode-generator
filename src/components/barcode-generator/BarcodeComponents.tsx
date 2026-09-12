@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Copy, Lock, Printer } from 'lucide-react'
+import { Copy, Lock } from 'lucide-react'
 import { useBarcodeContext } from './BarcodeContext'
 
 import { useTranslations } from 'next-intl'
@@ -11,33 +11,8 @@ import { ShareButton } from './share-button'
 import { Switch } from '@/components/ui/switch'
 import ScrollControls from './ScrollControls'
 import ImportData from './ImportData'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { lockHeight } from '@/config/barcode-types'
-
-const LayoutSelector: React.FC<{
-  onLayoutChange: (layout: string) => void
-}> = ({ onLayoutChange }) => {
-  const t = useTranslations('Barcode')
-  return (
-    <Select onValueChange={onLayoutChange}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder={t('layout.name')} defaultValue={'3x4'} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="1x2">{t('layout.1x2')}</SelectItem>
-        <SelectItem value="2x3">{t('layout.2x3')}</SelectItem>
-        <SelectItem value="3x4">{t('layout.3x4')}</SelectItem>
-        <SelectItem value="4x5">{t('layout.4x5')}</SelectItem>
-      </SelectContent>
-    </Select>
-  )
-}
+import { PrintLabelsDialog } from './PrintLabelsDialog'
 
 export const InputComponent: React.FC = () => {
   const t = useTranslations('Barcode')
@@ -90,70 +65,10 @@ export const InputComponent: React.FC = () => {
   )
 }
 
-interface PrintButtonProps {
-  output: string[]
-  layout: string
-}
-
-export const PrintButton: React.FC<PrintButtonProps> = ({ output, layout }) => {
-  const handlePrint = () => {
-    const [cols] = layout.split('x').map(Number)
-    const printContent = `
-      <html>
-        <head>
-          <title>Barcode Print</title>
-          <style>
-            body { font-family: Arial, sans-serif; }
-            .barcode-container { 
-              display: grid;
-              grid-template-columns: repeat(${cols}, 1fr);
-              gap: 10px;
-              page-break-inside: avoid;
-            }
-            .barcode-item { text-align: center; }
-            @media print {
-              @page { size: A4; margin: 0; }
-              body { margin: 1cm; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="barcode-container">${output.join('')}</div>
-        </body>
-      </html>
-    `
-
-    const iframe = document.createElement('iframe')
-    iframe.style.display = 'none'
-    document.body.appendChild(iframe)
-
-    const iframeDoc = iframe.contentWindow?.document
-    if (iframeDoc) {
-      iframeDoc.open()
-      iframeDoc.write(printContent)
-      iframeDoc.close()
-
-      iframe.onload = () => {
-        iframe.contentWindow?.print()
-        setTimeout(() => {
-          document.body.removeChild(iframe)
-        }, 100)
-      }
-    }
-  }
-
-  return (
-    <Button size="icon" variant="ghost" onClick={handlePrint}>
-      <Printer className="h-5 w-5" />
-    </Button>
-  )
-}
-
 export const OutputComponent: React.FC = () => {
-  const { output } = useBarcodeContext()
+  const { output, codeFormat } = useBarcodeContext()
   const outputRef = React.useRef<HTMLDivElement>(null)
   const t = useTranslations('Barcode')
-  const [layout, setLayout] = React.useState('3x4')
 
   // Create a numbered output
   const numberedOutput = output
@@ -179,8 +94,7 @@ export const OutputComponent: React.FC = () => {
           </span>
           <span className="label-text-alt flex items-center justify-between gap-4">
             <ShareButton size="icon" variant="ghost" />
-            <PrintButton output={output} layout={layout} />
-            <LayoutSelector onLayoutChange={setLayout} />
+            <PrintLabelsDialog output={output} codeFormat={codeFormat} />
             <ScrollControls outputRef={outputRef} />
           </span>
         </div>
