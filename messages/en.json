@@ -27,12 +27,24 @@
     "output": {
       "title": "Output"
     },
-    "layout": {
-      "name": "Print Layout",
-      "1x2": "Print 1 Column",
-      "2x3": "Print 2 Columns",
-      "3x4": "Print 3 Columns",
-      "4x5": "Print 4 Columns"
+    "print": {
+      "button": "Print labels",
+      "title": "Label print layout",
+      "description": "Arrange the generated barcodes on printable label sheets, then preview and print them.",
+      "paper": "Paper size",
+      "paper-a4": "A4",
+      "paper-letter": "Letter",
+      "paper-a5": "A5",
+      "orientation": "Orientation",
+      "portrait": "Portrait",
+      "landscape": "Landscape",
+      "columns": "Columns",
+      "rows": "Rows",
+      "margin": "Page margin (mm)",
+      "gap": "Label gap (mm)",
+      "summary": "{count} labels · {perPage} per page · {pages} pages",
+      "cancel": "Cancel",
+      "submit": "Print"
     }
   },
   "scroll": {

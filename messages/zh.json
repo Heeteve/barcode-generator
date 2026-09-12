@@ -27,12 +27,24 @@
     "output": {
       "title": "输出"
     },
-    "layout": {
-      "name": "打印布局",
-      "1x2": "打印1列",
-      "2x3": "打印2列",
-      "3x4": "打印3列",
-      "4x5": "打印4列"
+    "print": {
+      "button": "打印标签",
+      "title": "标签打印排版",
+      "description": "将生成的条码排版到标签纸上，确认预览后进行打印。",
+      "paper": "纸张大小",
+      "paper-a4": "A4",
+      "paper-letter": "Letter",
+      "paper-a5": "A5",
+      "orientation": "方向",
+      "portrait": "纵向",
+      "landscape": "横向",
+      "columns": "列数",
+      "rows": "行数",
+      "margin": "页面边距（毫米）",
+      "gap": "标签间距（毫米）",
+      "summary": "共 {count} 个标签 · 每页 {perPage} 个 · 共 {pages} 页",
+      "cancel": "取消",
+      "submit": "打印"
     }
   },
   "scroll": {
