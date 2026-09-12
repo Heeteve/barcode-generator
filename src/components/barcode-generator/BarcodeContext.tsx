@@ -7,6 +7,7 @@ import React, {
   useContext,
   useMemo,
   useEffect,
+  useCallback,
 } from 'react'
 
 interface BarcodeContextType {
@@ -147,7 +148,7 @@ export const BarcodeProvider: React.FC<{
   const [input, setInput] = useState<string>(initData)
   const [output, setOutput] = useState<string[]>([])
   const [showOptions, setShowOptions] = useState<boolean>(false)
-  const [codeFormat, setCodeFormat] = useState(initCodeFormat)
+  const [codeFormat, setCurrentCodeFormat] = useState(initCodeFormat)
   const [imageFormat, setImageFormat] = useState<ImageFormat>(
     savedState?.globalSettings?.imageFormat || savedState?.imageFormat || 'svg',
   )
@@ -176,27 +177,50 @@ export const BarcodeProvider: React.FC<{
     currentSettings.barcodeMargin,
   )
 
-  // 当编码格式改变时，更新设置
-  useEffect(() => {
-    const settings =
-      formatSettings[codeFormat] || getDefaultSettingsForFormat(codeFormat)
-    setBarcodeLength(settings.barcodeLength)
-    setBarcodeHeight(settings.barcodeHeight)
-    setShowText(settings.showText)
-    setBarcodeMargin(settings.barcodeMargin)
-  }, [codeFormat, formatSettings])
+  const setCodeFormat = useCallback(
+    (format: string) => {
+      if (format.toLowerCase() === codeFormat.toLowerCase()) {
+        return
+      }
+
+      const settings =
+        formatSettings[format] || getDefaultSettingsForFormat(format)
+
+      setCurrentCodeFormat(format)
+      setBarcodeLength(settings.barcodeLength)
+      setBarcodeHeight(settings.barcodeHeight)
+      setShowText(settings.showText)
+      setBarcodeMargin(settings.barcodeMargin)
+    },
+    [codeFormat, formatSettings],
+  )
 
   // 当设置改变时，更新格式设置
   useEffect(() => {
-    setFormatSettings((prev) => ({
-      ...prev,
-      [codeFormat]: {
+    setFormatSettings((prev) => {
+      const current = prev[codeFormat]
+      const next: FormatSettings = {
         barcodeLength,
         barcodeHeight,
         showText,
         barcodeMargin,
-      },
-    }))
+      }
+
+      if (
+        current &&
+        current.barcodeLength === next.barcodeLength &&
+        current.barcodeHeight === next.barcodeHeight &&
+        current.showText === next.showText &&
+        current.barcodeMargin === next.barcodeMargin
+      ) {
+        return prev
+      }
+
+      return {
+        ...prev,
+        [codeFormat]: next,
+      }
+    })
   }, [codeFormat, barcodeLength, barcodeHeight, showText, barcodeMargin])
 
   // 保存设置到本地存储
@@ -241,6 +265,7 @@ export const BarcodeProvider: React.FC<{
       showText,
       showOptions,
       codeFormat,
+      setCodeFormat,
       imageFormat,
       barcodeMargin,
     ],

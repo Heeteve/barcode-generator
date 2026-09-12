@@ -42,7 +42,7 @@ const ImportData: React.FC<ImportDataProps> = ({ setInput }) => {
       <CSVReader onUploadAccepted={handleCSVImport}>
         {({ getRootProps }: any) => (
           <div className="flex  items-center ">
-            <span className="text-xs">Import CSV</span>
+            {/* <span className="text-xs">Import CSV</span> */}
             <Button
               {...getRootProps()}
               size="icon"

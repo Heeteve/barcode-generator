@@ -50,6 +50,10 @@ import {
 interface PrintLabelsDialogProps {
   output: string[]
   codeFormat: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: React.ReactNode | null
+  onPrintSuccess?: () => void
 }
 
 interface Copy {
@@ -291,6 +295,10 @@ const ChoiceCard: React.FC<{
 export const PrintLabelsDialog: React.FC<PrintLabelsDialogProps> = ({
   output,
   codeFormat,
+  open: controlledOpen,
+  onOpenChange,
+  trigger,
+  onPrintSuccess,
 }) => {
   const locale = useLocale()
   const copy = COPY[locale.toLowerCase().startsWith('zh') ? 'zh' : 'en']
@@ -299,7 +307,7 @@ export const PrintLabelsDialog: React.FC<PrintLabelsDialogProps> = ({
     () => output.filter((item) => item.includes('<svg')),
     [output],
   )
-  const [open, setOpen] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const [printType, setPrintType] = useState<PrintType>('sheet')
   const [sheetPreset, setSheetPreset] = useState('a4-l7160')
   const [sheet, setSheet] = useState<SheetSettings>({
@@ -314,6 +322,18 @@ export const PrintLabelsDialog: React.FC<PrintLabelsDialogProps> = ({
   const [currentPage, setCurrentPage] = useState(0)
   const [isDownloading, setIsDownloading] = useState(false)
   const [error, setError] = useState('')
+  const open = controlledOpen ?? uncontrolledOpen
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (controlledOpen === undefined) {
+      setUncontrolledOpen(nextOpen)
+    }
+    onOpenChange?.(nextOpen)
+    if (nextOpen) {
+      setError('')
+      setCurrentPage(0)
+    }
+  }
 
   const grid = useMemo(() => getSheetGrid(sheet), [sheet])
   const plans = useMemo(
@@ -397,6 +417,7 @@ export const PrintLabelsDialog: React.FC<PrintLabelsDialogProps> = ({
     }
 
     printPlans(plans, `${copy.title} - ${codeFormat}`)
+    onPrintSuccess?.()
   }
 
   const handleDownloadPdf = async () => {
@@ -421,32 +442,27 @@ export const PrintLabelsDialog: React.FC<PrintLabelsDialogProps> = ({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen)
-        if (nextOpen) {
-          setError('')
-          setCurrentPage(0)
-        }
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={!barcodes.length}
-          className="gap-2 px-2"
-          aria-label={copy.button}
-          title={copy.button}
-        >
-          <Printer className="h-5 w-5" />
-          <span className="hidden text-xs font-medium xl:inline">
-            {copy.button}
-          </span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {trigger === null ? null : (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!barcodes.length}
+              className="gap-2 px-2"
+              aria-label={copy.button}
+              title={copy.button}
+            >
+              <Printer className="h-5 w-5" />
+              <span className="hidden text-xs font-medium xl:inline">
+                {copy.button}
+              </span>
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
 
       <DialogContent className="flex h-[min(92vh,880px)] w-[calc(100vw-1rem)] max-w-[960px] flex-col gap-0 overflow-hidden bg-white p-0 text-slate-900 sm:rounded-xl">
         <DialogHeader className="shrink-0 border-b border-slate-200 px-5 py-4 pr-12 text-left">

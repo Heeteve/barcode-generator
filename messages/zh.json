@@ -3,7 +3,7 @@
     "title": "免费条码生成器是一个在线工具，可以让用户轻松创建各种格式的条码和二维码。它支持多种编码类型，并允许用户实时批量生成条码，完全免费使用"
   },
   "Barcode": {
-    "title": "免费 {type} 条码生成器",
+    "title": "条码生成器 {type}",
     "input": {
       "title": "条形码值（每行一个）",
       "placeholder": "输入内容，每行一个",
@@ -28,6 +28,21 @@
     "output": {
       "title": "输出"
     },
+    "download": {
+      "button": "下载",
+      "as": "格式",
+      "format": "格式"
+    },
+    "copy": {
+      "title": "复制条码",
+      "image": "条码图片 ({current}/{total})",
+      "previous": "上一张条码",
+      "next": "下一张条码",
+      "copy-as-image": "复制为图片",
+      "copying": "正在复制...",
+      "copied": "已复制",
+      "button": "复制条码 PNG 图片"
+    },
     "print": {
       "button": "打印标签",
       "title": "标签打印排版",
@@ -46,6 +61,60 @@
       "summary": "共 {count} 个标签 · 每页 {perPage} 个 · 共 {pages} 页",
       "cancel": "取消",
       "submit": "打印"
+    }
+  },
+  "Guide": {
+    "title": "分步创建条码",
+    "entry": "分步模式",
+    "full-editor": "完整模式",
+    "subtitle": "按照四个简单步骤创建、导出或打印条码。",
+    "steps": {
+      "format": "选择格式",
+      "input": "输入内容",
+      "action": "导出或打印",
+      "complete": "完成"
+    },
+    "format": {
+      "title": "选择条码格式",
+      "description": "选择要创建的条码类型。",
+      "continue": "使用此格式",
+      "advanced": "高级选项：完整格式选择",
+      "search-placeholder": "搜索条码格式",
+      "quick": {
+        "any": "任意条码",
+        "any-hint": "使用 Code 128",
+        "ean13": "13 位条码",
+        "ean13-hint": "使用 EAN-13",
+        "qrcode": "二维码",
+        "qrcode-hint": "使用 QR Code"
+      }
+    },
+    "input": {
+      "title": "输入条码内容",
+      "description": "每行创建一个条码；可在内容后用 Tab 添加显示文字。",
+      "preview": "条码预览",
+      "advanced": "高级设置",
+      "back": "上一步",
+      "continue": "继续",
+      "invalid": "请先输入可生成的条码内容。"
+    },
+    "action": {
+      "title": "选择操作方式",
+      "description": "导出、复制图片，或进入标签打印排版。",
+      "export": "导出或复制",
+      "export-hint": "下载文件或复制 PNG 图片",
+      "print": "打印标签",
+      "print-hint": "进入标签打印排版窗口",
+      "download": "下载条码",
+      "copy": "复制 PNG 图片",
+      "open-print": "打开标签打印排版",
+      "back": "上一步",
+      "complete": "完成创建"
+    },
+    "complete": {
+      "title": "条码已准备完成",
+      "description": "已创建 {count} 个 {format} 条码。",
+      "restart": "重新创建条码"
     }
   },
   "scroll": {

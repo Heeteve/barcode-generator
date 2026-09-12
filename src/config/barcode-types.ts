@@ -20,7 +20,7 @@ export const barcodeTypes = [
   {
     name: 'EAN / UPC',
     types: [
-      { name: 'EAN-13', value: 'Ean13', initData: '5901234123457' },
+      { name: 'EAN-13', value: 'Ean13', initData: '690123456789' },
       { name: 'EAN-8', value: 'Ean8', initData: '96385074' },
       { name: 'EAN-5', value: 'Ean5', initData: '54495' },
       { name: 'EAN-2', value: 'Ean2', initData: '53' },
@@ -41,7 +41,7 @@ export const barcodeTypes = [
       {
         name: 'QR Code',
         value: 'Qrcode',
-        initData: 'https://barcode-maker.com',
+        initData: 'https://www.baidu.com',
       },
       {
         name: 'Data Matrix',

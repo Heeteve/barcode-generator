@@ -15,9 +15,22 @@ import { Download } from 'lucide-react'
 import { ImageFormat } from '@/types/image'
 import { checkQRCode, jsBarcodeSupportedFormats } from '@/config/barcode-types'
 import { parseLine } from '@/lib/parseLine'
+import { useTranslations } from 'next-intl'
 const bwipjs = require('bwip-js') as any
 
-export const DownloadBarcodes: React.FC = () => {
+interface DownloadBarcodesProps {
+  format?: ImageFormat
+  onFormatChange?: (format: ImageFormat) => void
+  onDownloadSuccess?: () => void
+  buttonLabel?: string
+}
+
+export const DownloadBarcodes: React.FC<DownloadBarcodesProps> = ({
+  format,
+  onFormatChange,
+  onDownloadSuccess,
+  buttonLabel,
+}) => {
   const {
     input,
     barcodeLength,
@@ -28,6 +41,9 @@ export const DownloadBarcodes: React.FC = () => {
     setImageFormat,
     barcodeMargin,
   } = useBarcodeContext()
+  const t = useTranslations('Barcode.download')
+  const activeImageFormat = format || imageFormat
+  const setActiveImageFormat = onFormatChange || setImageFormat
 
   const generateBarcode = useCallback(
     (parsed: {
@@ -37,7 +53,7 @@ export const DownloadBarcodes: React.FC = () => {
       new Promise((resolve, reject) => {
         const { barcodeValue: value, displayText } = parsed
         // PNG 使用 2 倍像素密度，其余格式保持原有输出尺寸
-        const resolutionScale = imageFormat === 'png' ? 2 : 1
+        const resolutionScale = activeImageFormat === 'png' ? 2 : 1
         const scaleFactor = resolutionScale
 
         try {
@@ -63,7 +79,7 @@ export const DownloadBarcodes: React.FC = () => {
               jsBarcodeConfig.text = displayText
             }
 
-            if (imageFormat === 'svg') {
+            if (activeImageFormat === 'svg') {
               const svg = document.createElementNS(
                 'http://www.w3.org/2000/svg',
                 'svg',
@@ -105,8 +121,8 @@ export const DownloadBarcodes: React.FC = () => {
                       reject(new Error('Failed to generate barcode image'))
                     }
                   },
-                  `image/${imageFormat}`,
-                  imageFormat === 'jpg' ? 0.9 : 1,
+                  `image/${activeImageFormat}`,
+                  activeImageFormat === 'jpg' ? 0.9 : 1,
                 )
               } catch (error) {
                 console.error('JsBarcode generation error:', error)
@@ -154,7 +170,7 @@ export const DownloadBarcodes: React.FC = () => {
             }
 
             try {
-              if (imageFormat === 'svg') {
+              if (activeImageFormat === 'svg') {
                 const svgString = bwipjs.toSVG(bwipConfig)
                 const parser = new DOMParser()
                 const doc = parser.parseFromString(svgString, 'image/svg+xml')
@@ -278,8 +294,8 @@ export const DownloadBarcodes: React.FC = () => {
                         reject(new Error('Failed to generate barcode image'))
                       }
                     },
-                    `image/${imageFormat}`,
-                    imageFormat === 'jpg' ? 0.9 : 1,
+                    `image/${activeImageFormat}`,
+                    activeImageFormat === 'jpg' ? 0.9 : 1,
                   )
                 } else {
                   // 如果不需要显示文本，直接使用原始尺寸
@@ -294,8 +310,8 @@ export const DownloadBarcodes: React.FC = () => {
                         reject(new Error('Failed to generate barcode image'))
                       }
                     },
-                    `image/${imageFormat}`,
-                    imageFormat === 'jpg' ? 0.9 : 1,
+                    `image/${activeImageFormat}`,
+                    activeImageFormat === 'jpg' ? 0.9 : 1,
                   )
                 }
               }
@@ -317,7 +333,7 @@ export const DownloadBarcodes: React.FC = () => {
       barcodeMargin,
       showText,
       codeFormat,
-      imageFormat,
+      activeImageFormat,
     ],
   )
 
@@ -327,40 +343,41 @@ export const DownloadBarcodes: React.FC = () => {
 
     if (parsed.length === 1) {
       const barcodeData = await generateBarcode(parsed[0])
-      if (imageFormat === 'svg') {
+      if (activeImageFormat === 'svg') {
         const blob = new Blob([barcodeData as string], {
           type: 'image/svg+xml;charset=utf-8',
         })
-        FileSaver.saveAs(blob, `barcode-${codeFormat}.${imageFormat}`)
+        FileSaver.saveAs(blob, `barcode-${codeFormat}.${activeImageFormat}`)
       } else {
         FileSaver.saveAs(
           barcodeData as Blob,
-          `barcode-${codeFormat}.${imageFormat}`,
+          `barcode-${codeFormat}.${activeImageFormat}`,
         )
       }
+      onDownloadSuccess?.()
     } else {
       const zip = new JSZip()
 
       for (let i = 0; i < parsed.length; i++) {
         const barcodeData = await generateBarcode(parsed[i])
-        if (imageFormat === 'svg') {
+        if (activeImageFormat === 'svg') {
           zip.file(
-            `barcode-${codeFormat}_${i + 1}.${imageFormat}`,
+            `barcode-${codeFormat}_${i + 1}.${activeImageFormat}`,
             barcodeData as string,
           )
         } else {
           zip.file(
-            `barcode-${codeFormat}_${i + 1}.${imageFormat}`,
+            `barcode-${codeFormat}_${i + 1}.${activeImageFormat}`,
             barcodeData as Blob,
           )
         }
       }
 
-      zip.generateAsync({ type: 'blob' }).then((content) => {
-        FileSaver.saveAs(content, 'barcodes(barcode-maker).zip')
-      })
+      const content = await zip.generateAsync({ type: 'blob' })
+      FileSaver.saveAs(content, 'barcodes(barcode-maker).zip')
+      onDownloadSuccess?.()
     }
-  }, [input, generateBarcode, imageFormat, codeFormat])
+  }, [input, generateBarcode, activeImageFormat, codeFormat, onDownloadSuccess])
 
   return (
     <div className="flex flex-wrap items-center justify-center space-x-2 space-y-2">
@@ -368,19 +385,22 @@ export const DownloadBarcodes: React.FC = () => {
         size="lg"
         variant="outline"
         onClick={downloadBarcodes}
-        title="download barcodes"
+        title={buttonLabel || t('button')}
         className="h-10 border-none bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 px-6 text-white hover:from-blue-700 hover:via-purple-700 hover:to-red-700"
       >
         <Download className="mr-2 h-4 w-4" />
-        <span className="text-sm">Download</span>
+        <span className="text-sm">{buttonLabel || t('button')}</span>
       </Button>
-      <span className="text-sm"> as</span>
+      <span className="text-sm">{t('as')}</span>
       <Select
-        value={imageFormat}
-        onValueChange={(value: ImageFormat) => setImageFormat(value)}
+        value={activeImageFormat}
+        onValueChange={(value: ImageFormat) => setActiveImageFormat(value)}
       >
-        <SelectTrigger className="h-8 w-[70px] bg-white">
-          <SelectValue placeholder="Format" />
+        <SelectTrigger
+          className="h-8 w-[70px] bg-white"
+          aria-label={t('format')}
+        >
+          <SelectValue placeholder={t('format')} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="png">PNG</SelectItem>

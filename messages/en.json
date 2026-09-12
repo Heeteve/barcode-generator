@@ -3,7 +3,7 @@
     "title": "Free Barcode Generator is an online tool that allows users to easily create various formats of barcodes and QR codes. It supports multiple encoding types and enables users to generate barcodes in real-time and in bulk, completely free of charge."
   },
   "Barcode": {
-    "title": "Free {type} Barcode Generator",
+    "title": "Barcode Generator {type}",
     "input": {
       "title": "Barcode Values (one per line)",
       "placeholder": "Enter values here, one per line",
@@ -28,6 +28,21 @@
     "output": {
       "title": "Output"
     },
+    "download": {
+      "button": "Download",
+      "as": "as",
+      "format": "Format"
+    },
+    "copy": {
+      "title": "Copy Barcode",
+      "image": "Barcode Image ({current}/{total})",
+      "previous": "Previous barcode",
+      "next": "Next barcode",
+      "copy-as-image": "Copy as Image",
+      "copying": "Copying...",
+      "copied": "Copied",
+      "button": "Copy Barcode PNG Image"
+    },
     "print": {
       "button": "Print labels",
       "title": "Label print layout",
@@ -46,6 +61,60 @@
       "summary": "{count} labels · {perPage} per page · {pages} pages",
       "cancel": "Cancel",
       "submit": "Print"
+    }
+  },
+  "Guide": {
+    "title": "Create Barcodes Step by Step",
+    "entry": "Step-by-step guide",
+    "full-editor": "Full editor",
+    "subtitle": "Create, export, or print barcodes in four simple steps.",
+    "steps": {
+      "format": "Select format",
+      "input": "Enter values",
+      "action": "Export or print",
+      "complete": "Done"
+    },
+    "format": {
+      "title": "Select a barcode format",
+      "description": "Choose the type of barcode you want to create.",
+      "continue": "Use this format",
+      "advanced": "Advanced options: all formats",
+      "search-placeholder": "Search barcode formats",
+      "quick": {
+        "any": "Any barcode",
+        "any-hint": "Use Code 128",
+        "ean13": "13-digit barcode",
+        "ean13-hint": "Use EAN-13",
+        "qrcode": "QR code",
+        "qrcode-hint": "Use QR Code"
+      }
+    },
+    "input": {
+      "title": "Enter barcode values",
+      "description": "Create one barcode per line; use Tab after a value to add display text.",
+      "preview": "Barcode preview",
+      "advanced": "Advanced settings",
+      "back": "Back",
+      "continue": "Continue",
+      "invalid": "Enter barcode values that can be generated first."
+    },
+    "action": {
+      "title": "Choose what to do next",
+      "description": "Export, copy an image, or open the label printing layout.",
+      "export": "Export or copy",
+      "export-hint": "Download a file or copy PNG images",
+      "print": "Print labels",
+      "print-hint": "Open the label print layout",
+      "download": "Download barcodes",
+      "copy": "Copy PNG image",
+      "open-print": "Open label print layout",
+      "back": "Back",
+      "complete": "Finish creating"
+    },
+    "complete": {
+      "title": "Your barcodes are ready",
+      "description": "Created {count} {format} barcode(s).",
+      "restart": "Create another barcode"
     }
   },
   "scroll": {
