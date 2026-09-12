@@ -36,7 +36,9 @@ export const DownloadBarcodes: React.FC = () => {
     }): Promise<Blob | string> =>
       new Promise((resolve, reject) => {
         const { barcodeValue: value, displayText } = parsed
-        const scaleFactor = 1
+        // PNG 使用 2 倍像素密度，其余格式保持原有输出尺寸
+        const resolutionScale = imageFormat === 'png' ? 2 : 1
+        const scaleFactor = resolutionScale
 
         try {
           if (jsBarcodeSupportedFormats.includes(codeFormat.toUpperCase())) {
@@ -118,6 +120,7 @@ export const DownloadBarcodes: React.FC = () => {
           } else {
             // BWIP-JS 配置
             const scale = 2
+            const bwipScale = scale * resolutionScale
             const MM_TO_PX = 2.835 * scale // 72 dpi / 25.4 mm/in
             const heightInMM = barcodeHeight / MM_TO_PX
             const widthInMM = barcodeLength / MM_TO_PX
@@ -132,7 +135,7 @@ export const DownloadBarcodes: React.FC = () => {
             const bwipConfig: Record<string, unknown> = {
               bcid: codeFormat.toLowerCase(),
               text: value,
-              scale: scale,
+              scale: bwipScale,
               height: heightInMM,
               width: widthInMM,
               includetext: showText,
@@ -246,7 +249,7 @@ export const DownloadBarcodes: React.FC = () => {
                     return
                   }
 
-                  bwipConfig.scale = scale * scaleRatio
+                  bwipConfig.scale = bwipScale * scaleRatio
                   bwipConfig.paddingbottom = marginInMM + fontSize / scaleRatio
                   bwipjs.toCanvas(finalCanvas, bwipConfig)
 
@@ -256,12 +259,14 @@ export const DownloadBarcodes: React.FC = () => {
 
                   // 绘制文本
                   ctx.fillStyle = '#000000'
-                  ctx.font = `${fontSize}px Arial`
+                  const outputFontSize = fontSize * resolutionScale
+                  const outputTextMargin = textMargin * resolutionScale
+                  ctx.font = `${outputFontSize}px Arial`
                   ctx.textAlign = 'center'
                   ctx.fillText(
                     labelText,
                     finalWidth / 2,
-                    finalHeight - fontSize - textMargin,
+                    finalHeight - outputFontSize - outputTextMargin,
                   )
 
                   // 转换为blob
