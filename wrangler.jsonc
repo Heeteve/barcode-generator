@@ -2,8 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "barcode-maker",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2026-09-13",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2026-09-12",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
