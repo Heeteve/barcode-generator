@@ -17,6 +17,12 @@ interface BarcodeCarouselProps {
   isCollapsed: boolean
 }
 
+const commonBarcodeValues = ['Code128', 'Ean13', 'Qrcode'] as const
+const allBarcodeTypes = barcodeTypes.flatMap((category) => category.types)
+const commonBarcodeTypes = commonBarcodeValues.flatMap((value) =>
+  allBarcodeTypes.filter((type) => type.value === value),
+)
+
 export function BarcodeCarousel({ isCollapsed }: BarcodeCarouselProps) {
   const pathname = usePathname()
   const locale = pathname.split('/')[1]
@@ -38,8 +44,18 @@ export function BarcodeCarousel({ isCollapsed }: BarcodeCarouselProps) {
 
   const [selectedIndex, setSelectedIndex] = useState(initialIndex)
 
+  const t = useTranslations('Barcode')
+
+  const categories = useMemo(
+    () => [
+      { name: t('select-format.common'), types: commonBarcodeTypes },
+      ...barcodeTypes,
+    ],
+    [t],
+  )
+
   const filteredTypes = useMemo(() => {
-    return barcodeTypes
+    return categories
       .map((category) => ({
         ...category,
         types: category.types.filter(
@@ -53,9 +69,7 @@ export function BarcodeCarousel({ isCollapsed }: BarcodeCarouselProps) {
         ),
       }))
       .filter((category) => category.types.length > 0)
-  }, [searchTerm])
-
-  const t = useTranslations('Barcode')
+  }, [categories, searchTerm])
 
   return (
     <div className={cn('flex-1 ', isCollapsed && 'hidden')}>

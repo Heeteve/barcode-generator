@@ -22,6 +22,7 @@
     },
     "select-format": {
       "name": "Select barcode format",
+      "common": "Common",
       "search-placeholder": "Enter barcode format..."
     },
     "output": {

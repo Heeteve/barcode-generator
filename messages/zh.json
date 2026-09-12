@@ -22,6 +22,7 @@
     },
     "select-format": {
       "name": "选择条码格式",
+      "common": "常用",
       "search-placeholder": "输入条码格式..."
     },
     "output": {
