@@ -1,0 +1,67 @@
+name: 部署到 Cloudflare Workers
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production:
+    name: 构建并部署生产 Worker
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'ci:'))
+    steps:
+      - name: 获取代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建 Cloudflare Worker
+        run: npm run build:cloudflare
+
+      - name: 部署 Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.125.0'
+          command: deploy
+
+  preview:
+    name: 构建并上传预览 Worker 版本
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.ref != 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'ci:'))
+    steps:
+      - name: 获取代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建 Cloudflare Worker
+        run: npm run build:cloudflare
+
+      - name: 上传预览 Worker 版本
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.125.0'
+          command: versions upload --preview-alias preview
