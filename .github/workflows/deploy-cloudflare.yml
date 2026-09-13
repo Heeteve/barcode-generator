@@ -14,7 +14,7 @@ jobs:
     name: 构建并部署生产 Worker
     runs-on: ubuntu-latest
     environment: production
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'ci:'))
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: 获取代码
         uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
     name: 构建并上传预览 Worker 版本
     runs-on: ubuntu-latest
     environment: production
-    if: github.ref != 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'ci:'))
+    if: github.ref != 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     steps:
       - name: 获取代码
         uses: actions/checkout@v4
