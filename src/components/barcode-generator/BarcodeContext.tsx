@@ -150,7 +150,7 @@ export const BarcodeProvider: React.FC<{
   const [showOptions, setShowOptions] = useState<boolean>(false)
   const [codeFormat, setCurrentCodeFormat] = useState(initCodeFormat)
   const [imageFormat, setImageFormat] = useState<ImageFormat>(
-    savedState?.globalSettings?.imageFormat || savedState?.imageFormat || 'svg',
+    savedState?.globalSettings?.imageFormat || savedState?.imageFormat || 'png',
   )
 
   // 获取当前格式的设置
