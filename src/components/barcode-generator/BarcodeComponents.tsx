@@ -13,6 +13,15 @@ import ScrollControls from './ScrollControls'
 import ImportData from './ImportData'
 import { lockHeight } from '@/config/barcode-types'
 import { PrintLabelsDialog } from './PrintLabelsDialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { clampBarcodeTextFontSize } from '@/types/barcode-text'
 
 export const InputComponent: React.FC = () => {
   const t = useTranslations('Barcode')
@@ -117,6 +126,18 @@ export const OptionsComponent: React.FC = () => {
     setBarcodeHeight,
     showText,
     setShowText,
+    textMode,
+    setTextMode,
+    textPosition,
+    setTextPosition,
+    textFontSize,
+    setTextFontSize,
+    textFontFamily,
+    setTextFontFamily,
+    textBold,
+    setTextBold,
+    textItalic,
+    setTextItalic,
     barcodeMargin,
     setBarcodeMargin,
     codeFormat,
@@ -164,6 +185,116 @@ export const OptionsComponent: React.FC = () => {
               />
             </div>
           </div>
+          {showText && (
+            <div className="space-y-3 md:col-span-1">
+              <Label className="text-sm font-medium">
+                {t('options.text-mode')}
+              </Label>
+              <RadioGroup
+                value={textMode}
+                onValueChange={setTextMode}
+                className="grid grid-cols-2 gap-2"
+              >
+                <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
+                  <RadioGroupItem
+                    value="replacement"
+                    id="textMode-replacement"
+                  />
+                  <span>{t('options.text-mode-replacement')}</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
+                  <RadioGroupItem
+                    value="independent"
+                    id="textMode-independent"
+                  />
+                  <span>{t('options.text-mode-independent')}</span>
+                </label>
+              </RadioGroup>
+            </div>
+          )}
+          {showText && textMode === 'independent' && (
+            <div className="space-y-3 rounded-md border border-slate-200 p-3 md:col-span-1">
+              <div>
+                <Label className="text-sm font-medium">
+                  {t('options.text-position')}
+                </Label>
+                <RadioGroup
+                  value={textPosition}
+                  onValueChange={setTextPosition}
+                  className="mt-2 grid grid-cols-2 gap-2"
+                >
+                  <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
+                    <RadioGroupItem value="top" id="textPosition-top" />
+                    <span>{t('options.text-position-top')}</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
+                    <RadioGroupItem value="bottom" id="textPosition-bottom" />
+                    <span>{t('options.text-position-bottom')}</span>
+                  </label>
+                </RadioGroup>
+              </div>
+              <div>
+                <Label htmlFor="textFontSize">
+                  {t('options.text-font-size')}
+                </Label>
+                <Input
+                  id="textFontSize"
+                  type="number"
+                  min={8}
+                  max={64}
+                  step={1}
+                  value={textFontSize}
+                  className="bg-white"
+                  onChange={(event) =>
+                    setTextFontSize(
+                      clampBarcodeTextFontSize(Number(event.target.value)),
+                    )
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="textFontFamily">
+                  {t('options.text-font-family')}
+                </Label>
+                <Select
+                  value={textFontFamily}
+                  onValueChange={setTextFontFamily}
+                >
+                  <SelectTrigger id="textFontFamily" className="bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="noto-sans-sc">
+                      {t('options.text-font-noto-sans')}
+                    </SelectItem>
+                    <SelectItem value="noto-serif-sc">
+                      {t('options.text-font-noto-serif')}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between rounded-md border bg-white px-3 py-2">
+                  <Label htmlFor="textBold">{t('options.text-bold')}</Label>
+                  <Switch
+                    id="textBold"
+                    checked={textBold}
+                    onCheckedChange={setTextBold}
+                    className="border-gray-400"
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-md border bg-white px-3 py-2">
+                  <Label htmlFor="textItalic">{t('options.text-italic')}</Label>
+                  <Switch
+                    id="textItalic"
+                    checked={textItalic}
+                    onCheckedChange={setTextItalic}
+                    className="border-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           <div className="md:col-span-1">
             <Label htmlFor="barcodeLength">{t('options.barcode-length')}</Label>
             <Input

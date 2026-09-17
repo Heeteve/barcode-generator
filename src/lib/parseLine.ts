@@ -1,11 +1,9 @@
 /**
- * Parse a single input line into { barcodeValue, displayText }.
+ * 将单行输入解析为条码值和 Tab 后的文字。
  *
- * Format:  "value\tcaption"
- *   - If a tab character is present, the part before the first tab is the
- *     barcode content and the part after is the display text shown below the bars.
- *   - If no tab is present, the whole line is the barcode content and the
- *     display text falls back to whatever the barcode library renders by default.
+ * 格式："value\tcaption"
+ * 文字的替代或独立显示方式，以及具体显示位置，由条码文字设置决定。
+ * 没有 Tab 或 Tab 后为空时，文字回退到条码库的原生文字。
  */
 export const parseLine = (
   line: string,

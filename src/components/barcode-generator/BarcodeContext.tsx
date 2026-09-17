@@ -1,6 +1,13 @@
 'use client'
 import { barcodeTypes, checkQRCode } from '@/config/barcode-types'
 import { ImageFormat } from '@/types/image'
+import {
+  BarcodeTextFontFamily,
+  BarcodeTextMode,
+  BarcodeTextPosition,
+  DEFAULT_BARCODE_TEXT_SETTINGS,
+  normalizeBarcodeTextSettings,
+} from '@/types/barcode-text'
 import React, {
   createContext,
   useState,
@@ -21,6 +28,18 @@ interface BarcodeContextType {
   setBarcodeHeight: (height: number) => void
   showText: boolean
   setShowText: (show: boolean) => void
+  textMode: BarcodeTextMode
+  setTextMode: (mode: BarcodeTextMode) => void
+  textPosition: BarcodeTextPosition
+  setTextPosition: (position: BarcodeTextPosition) => void
+  textFontSize: number
+  setTextFontSize: (fontSize: number) => void
+  textFontFamily: BarcodeTextFontFamily
+  setTextFontFamily: (fontFamily: BarcodeTextFontFamily) => void
+  textBold: boolean
+  setTextBold: (bold: boolean) => void
+  textItalic: boolean
+  setTextItalic: (italic: boolean) => void
   showOptions: boolean
   setShowOptions: (show: boolean) => void
   codeFormat: string
@@ -36,6 +55,12 @@ interface FormatSettings {
   barcodeHeight: number
   showText: boolean
   barcodeMargin: number
+  textMode: BarcodeTextMode
+  textPosition: BarcodeTextPosition
+  textFontSize: number
+  textFontFamily: BarcodeTextFontFamily
+  textBold: boolean
+  textItalic: boolean
 }
 
 interface SavedState {
@@ -48,7 +73,7 @@ interface SavedState {
 
   // 新版本的按格式配置
   formatSettings?: {
-    [format: string]: FormatSettings
+    [format: string]: Partial<FormatSettings>
   }
 
   // 全局配置
@@ -79,6 +104,38 @@ const DEFAULT_SETTINGS: FormatSettings = {
   barcodeHeight: 80,
   showText: true,
   barcodeMargin: 10,
+  textMode: DEFAULT_BARCODE_TEXT_SETTINGS.textMode,
+  textPosition: DEFAULT_BARCODE_TEXT_SETTINGS.textPosition,
+  textFontSize: DEFAULT_BARCODE_TEXT_SETTINGS.fontSize,
+  textFontFamily: DEFAULT_BARCODE_TEXT_SETTINGS.fontFamily,
+  textBold: DEFAULT_BARCODE_TEXT_SETTINGS.bold,
+  textItalic: DEFAULT_BARCODE_TEXT_SETTINGS.italic,
+}
+
+const normalizeFormatSettings = (
+  format: string,
+  settings?: Partial<FormatSettings>,
+): FormatSettings => {
+  const defaults = getDefaultSettingsForFormat(format)
+  const textSettings = normalizeBarcodeTextSettings({
+    textMode: settings?.textMode,
+    textPosition: settings?.textPosition,
+    fontSize: settings?.textFontSize,
+    fontFamily: settings?.textFontFamily,
+    bold: settings?.textBold,
+    italic: settings?.textItalic,
+  })
+
+  return {
+    ...defaults,
+    ...settings,
+    textMode: textSettings.textMode,
+    textPosition: textSettings.textPosition,
+    textFontSize: textSettings.fontSize,
+    textFontFamily: textSettings.fontFamily,
+    textBold: textSettings.bold,
+    textItalic: textSettings.italic,
+  }
 }
 
 // 获取指定格式的默认设置
@@ -109,7 +166,12 @@ export const BarcodeProvider: React.FC<{
   }>(() => {
     // 如果有新版本的按格式配置，则使用它
     if (savedState?.formatSettings) {
-      return savedState.formatSettings
+      return Object.fromEntries(
+        Object.entries(savedState.formatSettings).map(([format, settings]) => [
+          format,
+          normalizeFormatSettings(format, settings),
+        ]),
+      )
     }
 
     // 否则，创建一个新的配置对象，并将旧版本的全局配置作为默认值
@@ -125,6 +187,12 @@ export const BarcodeProvider: React.FC<{
         showText: savedState.showText ?? DEFAULT_SETTINGS.showText,
         barcodeMargin:
           savedState.barcodeMargin || DEFAULT_SETTINGS.barcodeMargin,
+        textMode: DEFAULT_SETTINGS.textMode,
+        textPosition: DEFAULT_SETTINGS.textPosition,
+        textFontSize: DEFAULT_SETTINGS.textFontSize,
+        textFontFamily: DEFAULT_SETTINGS.textFontFamily,
+        textBold: DEFAULT_SETTINGS.textBold,
+        textItalic: DEFAULT_SETTINGS.textItalic,
       }
 
       // 为初始格式设置旧版本的全局配置
@@ -159,7 +227,7 @@ export const BarcodeProvider: React.FC<{
     if (!formatSettings[codeFormat]) {
       return getDefaultSettingsForFormat(codeFormat)
     }
-    return formatSettings[codeFormat]
+    return normalizeFormatSettings(codeFormat, formatSettings[codeFormat])
   }
 
   // 当前格式的设置
@@ -173,6 +241,22 @@ export const BarcodeProvider: React.FC<{
     currentSettings.barcodeHeight,
   )
   const [showText, setShowText] = useState<boolean>(currentSettings.showText)
+  const [textMode, setTextMode] = useState<BarcodeTextMode>(
+    currentSettings.textMode,
+  )
+  const [textPosition, setTextPosition] = useState<BarcodeTextPosition>(
+    currentSettings.textPosition,
+  )
+  const [textFontSize, setTextFontSize] = useState<number>(
+    currentSettings.textFontSize,
+  )
+  const [textFontFamily, setTextFontFamily] = useState<BarcodeTextFontFamily>(
+    currentSettings.textFontFamily,
+  )
+  const [textBold, setTextBold] = useState<boolean>(currentSettings.textBold)
+  const [textItalic, setTextItalic] = useState<boolean>(
+    currentSettings.textItalic,
+  )
   const [barcodeMargin, setBarcodeMargin] = useState<number>(
     currentSettings.barcodeMargin,
   )
@@ -183,14 +267,19 @@ export const BarcodeProvider: React.FC<{
         return
       }
 
-      const settings =
-        formatSettings[format] || getDefaultSettingsForFormat(format)
+      const settings = normalizeFormatSettings(format, formatSettings[format])
 
       setCurrentCodeFormat(format)
       setBarcodeLength(settings.barcodeLength)
       setBarcodeHeight(settings.barcodeHeight)
       setShowText(settings.showText)
       setBarcodeMargin(settings.barcodeMargin)
+      setTextMode(settings.textMode)
+      setTextPosition(settings.textPosition)
+      setTextFontSize(settings.textFontSize)
+      setTextFontFamily(settings.textFontFamily)
+      setTextBold(settings.textBold)
+      setTextItalic(settings.textItalic)
     },
     [codeFormat, formatSettings],
   )
@@ -204,6 +293,12 @@ export const BarcodeProvider: React.FC<{
         barcodeHeight,
         showText,
         barcodeMargin,
+        textMode,
+        textPosition,
+        textFontSize,
+        textFontFamily,
+        textBold,
+        textItalic,
       }
 
       if (
@@ -211,7 +306,13 @@ export const BarcodeProvider: React.FC<{
         current.barcodeLength === next.barcodeLength &&
         current.barcodeHeight === next.barcodeHeight &&
         current.showText === next.showText &&
-        current.barcodeMargin === next.barcodeMargin
+        current.barcodeMargin === next.barcodeMargin &&
+        current.textMode === next.textMode &&
+        current.textPosition === next.textPosition &&
+        current.textFontSize === next.textFontSize &&
+        current.textFontFamily === next.textFontFamily &&
+        current.textBold === next.textBold &&
+        current.textItalic === next.textItalic
       ) {
         return prev
       }
@@ -221,7 +322,19 @@ export const BarcodeProvider: React.FC<{
         [codeFormat]: next,
       }
     })
-  }, [codeFormat, barcodeLength, barcodeHeight, showText, barcodeMargin])
+  }, [
+    codeFormat,
+    barcodeLength,
+    barcodeHeight,
+    showText,
+    barcodeMargin,
+    textMode,
+    textPosition,
+    textFontSize,
+    textFontFamily,
+    textBold,
+    textItalic,
+  ])
 
   // 保存设置到本地存储
   useEffect(() => {
@@ -248,6 +361,18 @@ export const BarcodeProvider: React.FC<{
       setBarcodeHeight,
       showText,
       setShowText,
+      textMode,
+      setTextMode,
+      textPosition,
+      setTextPosition,
+      textFontSize,
+      setTextFontSize,
+      textFontFamily,
+      setTextFontFamily,
+      textBold,
+      setTextBold,
+      textItalic,
+      setTextItalic,
       showOptions,
       setShowOptions,
       codeFormat,
@@ -263,6 +388,12 @@ export const BarcodeProvider: React.FC<{
       barcodeLength,
       barcodeHeight,
       showText,
+      textMode,
+      textPosition,
+      textFontSize,
+      textFontFamily,
+      textBold,
+      textItalic,
       showOptions,
       codeFormat,
       setCodeFormat,

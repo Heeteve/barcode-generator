@@ -5,7 +5,7 @@ import { Locale, locales } from '@/i18n'
 import { unstable_setRequestLocale } from 'next-intl/server'
 
 import { getSiteConfig } from '@/config/site-i18n'
-import { fontSans } from '@/lib/fonts'
+import { fontNotoSansSC, fontNotoSerifSC, fontSans } from '@/lib/fonts'
 import { cn } from '@/lib/utils'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -60,6 +60,8 @@ export default async function RootLayout({
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
           fontSans.variable,
+          fontNotoSansSC.variable,
+          fontNotoSerifSC.variable,
           inter.className,
         )}
       >

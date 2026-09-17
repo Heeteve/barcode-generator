@@ -8,15 +8,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useBarcodeContext } from './BarcodeContext'
-import JsBarcode from 'jsbarcode'
 import JSZip from 'jszip'
 import FileSaver from 'file-saver'
 import { Download } from 'lucide-react'
 import { ImageFormat } from '@/types/image'
-import { checkQRCode, jsBarcodeSupportedFormats } from '@/config/barcode-types'
 import { parseLine } from '@/lib/parseLine'
+import { renderBarcodeSvg, svgToImageBlob } from '@/lib/barcode-renderer'
 import { useTranslations } from 'next-intl'
-const bwipjs = require('bwip-js') as any
 
 interface DownloadBarcodesProps {
   format?: ImageFormat
@@ -40,293 +38,48 @@ export const DownloadBarcodes: React.FC<DownloadBarcodesProps> = ({
     imageFormat,
     setImageFormat,
     barcodeMargin,
+    textMode,
+    textPosition,
+    textFontSize,
+    textFontFamily,
+    textBold,
+    textItalic,
   } = useBarcodeContext()
   const t = useTranslations('Barcode.download')
   const activeImageFormat = format || imageFormat
   const setActiveImageFormat = onFormatChange || setImageFormat
 
   const generateBarcode = useCallback(
-    (parsed: {
+    async (parsed: {
       barcodeValue: string
       displayText: string | undefined
-    }): Promise<Blob | string> =>
-      new Promise((resolve, reject) => {
-        const { barcodeValue: value, displayText } = parsed
-        // PNG 使用 2 倍像素密度，其余格式保持原有输出尺寸
-        const resolutionScale = activeImageFormat === 'png' ? 2 : 1
-        const scaleFactor = resolutionScale
+    }): Promise<Blob | string> => {
+      const svg = renderBarcodeSvg({
+        value: parsed.barcodeValue,
+        displayText: parsed.displayText,
+        barcodeLength,
+        barcodeHeight,
+        barcodeMargin,
+        showText,
+        codeFormat,
+        textMode,
+        textPosition,
+        fontSize: textFontSize,
+        fontFamily: textFontFamily,
+        bold: textBold,
+        italic: textItalic,
+      })
 
-        try {
-          if (jsBarcodeSupportedFormats.includes(codeFormat.toUpperCase())) {
-            // JsBarcode 配置
-            const jsBarcodeConfig: Record<string, unknown> = {
-              format: codeFormat.toUpperCase(),
-              width: 2,
-              height: barcodeHeight,
-              displayValue: showText,
-              font: 'Arial',
-              fontSize: 20,
-              textMargin: 2,
-              margin: barcodeMargin,
-              background: '#ffffff',
-              lineColor: '#000000',
-              textAlign: 'center',
-              textPosition: 'bottom',
-            }
+      if (activeImageFormat === 'svg') {
+        return svg
+      }
 
-            // Override display text when a custom caption is provided
-            if (showText && displayText !== undefined) {
-              jsBarcodeConfig.text = displayText
-            }
-
-            if (activeImageFormat === 'svg') {
-              const svg = document.createElementNS(
-                'http://www.w3.org/2000/svg',
-                'svg',
-              )
-
-              try {
-                JsBarcode(svg, value, jsBarcodeConfig)
-                svg.setAttribute('width', `${barcodeLength}`)
-                svg.setAttribute('height', `${barcodeHeight}`)
-                resolve(new XMLSerializer().serializeToString(svg))
-              } catch (error) {
-                console.error('JsBarcode generation error:', error)
-                reject(
-                  new Error(
-                    `Invalid barcode value for ${codeFormat}: ${value}`,
-                  ),
-                )
-              }
-            } else {
-              const canvas = document.createElement('canvas')
-              canvas.width = barcodeLength * scaleFactor
-              canvas.height = barcodeHeight * scaleFactor
-
-              try {
-                JsBarcode(canvas, value, {
-                  ...jsBarcodeConfig,
-                  width: 2 * scaleFactor,
-                  height: barcodeHeight * scaleFactor,
-                  fontSize: 20 * scaleFactor,
-                  textMargin: 2 * scaleFactor,
-                  margin: barcodeMargin * scaleFactor,
-                })
-
-                canvas.toBlob(
-                  (blob) => {
-                    if (blob) {
-                      resolve(blob)
-                    } else {
-                      reject(new Error('Failed to generate barcode image'))
-                    }
-                  },
-                  `image/${activeImageFormat}`,
-                  activeImageFormat === 'jpg' ? 0.9 : 1,
-                )
-              } catch (error) {
-                console.error('JsBarcode generation error:', error)
-                reject(
-                  new Error(
-                    `Invalid barcode value for ${codeFormat}: ${value}`,
-                  ),
-                )
-              }
-            }
-          } else {
-            // BWIP-JS 配置
-            const scale = 2
-            const bwipScale = scale * resolutionScale
-            const MM_TO_PX = 2.835 * scale // 72 dpi / 25.4 mm/in
-            const heightInMM = barcodeHeight / MM_TO_PX
-            const widthInMM = barcodeLength / MM_TO_PX
-            const marginInMM = barcodeMargin / scale
-
-            // 检查是否是二维码类型
-            const isQRCode = checkQRCode(codeFormat)
-
-            const fontSize = 15 // 固定字体大小为15px
-            const textMargin = 2 // 文本与条码之间的间距
-
-            const bwipConfig: Record<string, unknown> = {
-              bcid: codeFormat.toLowerCase(),
-              text: value,
-              scale: bwipScale,
-              height: heightInMM,
-              width: widthInMM,
-              includetext: showText,
-              padding: marginInMM,
-              paddingbottom:
-                isQRCode && showText
-                  ? marginInMM + fontSize + textMargin
-                  : marginInMM,
-              backgroundcolor: 'ffffff',
-              barcolor: '000000',
-            }
-
-            // Override display text for bwip-js (alttext)
-            if (showText && displayText !== undefined) {
-              bwipConfig.alttext = displayText
-            }
-
-            try {
-              if (activeImageFormat === 'svg') {
-                const svgString = bwipjs.toSVG(bwipConfig)
-                const parser = new DOMParser()
-                const doc = parser.parseFromString(svgString, 'image/svg+xml')
-                const svg = doc.documentElement
-
-                svg.setAttribute('width', `${barcodeLength}`)
-                svg.setAttribute(
-                  'height',
-                  `${isQRCode && showText ? barcodeHeight + fontSize + textMargin : barcodeHeight}`,
-                )
-
-                if (isQRCode && showText) {
-                  // 使用 Canvas 测量文本宽度
-                  const canvas = document.createElement('canvas')
-                  const ctx = canvas.getContext('2d')
-
-                  if (ctx === null) {
-                    console.warn('Canvas 2D context not supported')
-                    return `<div class="barcode-item">${svg.outerHTML}</div>`
-                  }
-
-                  ctx.font = `${fontSize}px Arial`
-                  const labelText =
-                    displayText !== undefined ? displayText : value
-                  const textWidth = ctx.measureText(labelText).width
-
-                  // 计算缩放比例
-                  const availableWidth = barcodeLength - marginInMM * 2
-                  const scaleRatio = Math.min(1, availableWidth / textWidth)
-
-                  // 创建text元素
-                  const text = document.createElementNS(
-                    'http://www.w3.org/2000/svg',
-                    'text',
-                  )
-                  text.setAttribute('x', `${marginInMM + barcodeLength / 2}`)
-                  text.setAttribute(
-                    'y',
-                    `${barcodeHeight + marginInMM * 2 + fontSize + textMargin}`,
-                  )
-                  text.setAttribute('text-anchor', 'middle')
-                  text.setAttribute('font-family', 'Arial')
-                  text.setAttribute('font-size', `${fontSize}`)
-                  text.setAttribute('transform', `scale(${scaleRatio})`)
-                  text.setAttribute(
-                    'transform-origin',
-                    `${marginInMM + barcodeLength / 2} ${barcodeHeight + marginInMM * 2 + fontSize / 2 + textMargin}`,
-                  )
-                  text.setAttribute('fill', '#000000')
-
-                  text.textContent = labelText
-                  svg.appendChild(text)
-
-                  svg.setAttribute(
-                    'height',
-                    `${barcodeHeight + fontSize + textMargin + marginInMM * 2}`,
-                  )
-                }
-                resolve(new XMLSerializer().serializeToString(svg))
-              } else {
-                if (isQRCode && showText) {
-                  // 创建临时canvas来测量文本宽度
-                  const tempCanvas = document.createElement('canvas')
-                  const tempCtx = tempCanvas.getContext('2d')
-
-                  if (!tempCtx) {
-                    console.warn('Canvas 2D context not supported')
-                    reject(new Error('Canvas 2D context not supported'))
-                    return
-                  }
-
-                  // 测量文本宽度
-                  const labelText =
-                    displayText !== undefined ? displayText : value
-                  tempCtx.font = `${fontSize}px Arial`
-                  const textWidth = tempCtx.measureText(labelText).width
-                  const requiredWidth = textWidth + barcodeMargin * 2 // 文本需要的宽度（包含边距）
-
-                  // 计算缩放比例 - 如果文本宽度大于原始宽度，需要放大整体尺寸
-                  const scaleRatio = Math.max(
-                    1,
-                    Math.ceil(requiredWidth / barcodeLength),
-                  )
-
-                  // 创建最终的canvas，尺寸根据缩放比例调整
-                  const finalCanvas = document.createElement('canvas')
-                  const ctx = finalCanvas.getContext('2d')
-
-                  if (!ctx) {
-                    console.warn('Canvas 2D context not supported')
-                    reject(new Error('Canvas 2D context not supported'))
-                    return
-                  }
-
-                  bwipConfig.scale = bwipScale * scaleRatio
-                  bwipConfig.paddingbottom = marginInMM + fontSize / scaleRatio
-                  bwipjs.toCanvas(finalCanvas, bwipConfig)
-
-                  // 设置最终canvas的尺寸
-                  const finalWidth = finalCanvas.width
-                  const finalHeight = finalCanvas.height
-
-                  // 绘制文本
-                  ctx.fillStyle = '#000000'
-                  const outputFontSize = fontSize * resolutionScale
-                  const outputTextMargin = textMargin * resolutionScale
-                  ctx.font = `${outputFontSize}px Arial`
-                  ctx.textAlign = 'center'
-                  ctx.fillText(
-                    labelText,
-                    finalWidth / 2,
-                    finalHeight - outputFontSize - outputTextMargin,
-                  )
-
-                  // 转换为blob
-                  finalCanvas.toBlob(
-                    (blob) => {
-                      if (blob) {
-                        resolve(blob)
-                      } else {
-                        reject(new Error('Failed to generate barcode image'))
-                      }
-                    },
-                    `image/${activeImageFormat}`,
-                    activeImageFormat === 'jpg' ? 0.9 : 1,
-                  )
-                } else {
-                  // 如果不需要显示文本，直接使用原始尺寸
-                  const canvas = document.createElement('canvas')
-                  bwipjs.toCanvas(canvas, bwipConfig)
-
-                  canvas.toBlob(
-                    (blob) => {
-                      if (blob) {
-                        resolve(blob)
-                      } else {
-                        reject(new Error('Failed to generate barcode image'))
-                      }
-                    },
-                    `image/${activeImageFormat}`,
-                    activeImageFormat === 'jpg' ? 0.9 : 1,
-                  )
-                }
-              }
-            } catch (error) {
-              console.error('BWIP-JS generation error:', error)
-              reject(
-                new Error(`Invalid barcode value for ${codeFormat}: ${value}`),
-              )
-            }
-          }
-        } catch (error) {
-          console.error('Error generating barcode:', error)
-          reject(new Error(`Failed to generate barcode: ${error}`))
-        }
-      }),
+      return svgToImageBlob(
+        svg,
+        activeImageFormat,
+        activeImageFormat === 'png' ? 2 : 1,
+      )
+    },
     [
       barcodeLength,
       barcodeHeight,
@@ -334,6 +87,12 @@ export const DownloadBarcodes: React.FC<DownloadBarcodesProps> = ({
       showText,
       codeFormat,
       activeImageFormat,
+      textMode,
+      textPosition,
+      textFontSize,
+      textFontFamily,
+      textBold,
+      textItalic,
     ],
   )
 
@@ -347,36 +106,36 @@ export const DownloadBarcodes: React.FC<DownloadBarcodesProps> = ({
         const blob = new Blob([barcodeData as string], {
           type: 'image/svg+xml;charset=utf-8',
         })
-        FileSaver.saveAs(blob, `barcode-${codeFormat}.${activeImageFormat}`)
+        FileSaver.saveAs(
+          blob,
+          'barcode-' + codeFormat + '.' + activeImageFormat,
+        )
       } else {
         FileSaver.saveAs(
           barcodeData as Blob,
-          `barcode-${codeFormat}.${activeImageFormat}`,
+          'barcode-' + codeFormat + '.' + activeImageFormat,
         )
       }
       onDownloadSuccess?.()
-    } else {
-      const zip = new JSZip()
-
-      for (let i = 0; i < parsed.length; i++) {
-        const barcodeData = await generateBarcode(parsed[i])
-        if (activeImageFormat === 'svg') {
-          zip.file(
-            `barcode-${codeFormat}_${i + 1}.${activeImageFormat}`,
-            barcodeData as string,
-          )
-        } else {
-          zip.file(
-            `barcode-${codeFormat}_${i + 1}.${activeImageFormat}`,
-            barcodeData as Blob,
-          )
-        }
-      }
-
-      const content = await zip.generateAsync({ type: 'blob' })
-      FileSaver.saveAs(content, 'barcodes(barcode-maker).zip')
-      onDownloadSuccess?.()
+      return
     }
+
+    const zip = new JSZip()
+    for (let i = 0; i < parsed.length; i += 1) {
+      const barcodeData = await generateBarcode(parsed[i])
+      const fileName =
+        'barcode-' + codeFormat + '_' + (i + 1) + '.' + activeImageFormat
+
+      if (activeImageFormat === 'svg') {
+        zip.file(fileName, barcodeData as string)
+      } else {
+        zip.file(fileName, barcodeData as Blob)
+      }
+    }
+
+    const content = await zip.generateAsync({ type: 'blob' })
+    FileSaver.saveAs(content, 'barcodes(barcode-maker).zip')
+    onDownloadSuccess?.()
   }, [input, generateBarcode, activeImageFormat, codeFormat, onDownloadSuccess])
 
   return (
