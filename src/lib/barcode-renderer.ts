@@ -17,6 +17,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
 const DEFAULT_NATIVE_FONT_SIZE = 15
 const DEFAULT_TEXT_MARGIN = 2
 const INDEPENDENT_TEXT_GAP = 4
+const INDEPENDENT_TEXT_BOTTOM_PADDING = 4
 
 const FONT_FAMILIES: Record<BarcodeTextFontFamily, string> = {
   'noto-sans-sc': fontNotoSansSC.style.fontFamily,
@@ -153,7 +154,10 @@ const appendTextLayout = (
   )
   const sidePadding = Math.max(8, barcodeMargin)
   const width = Math.max(barcodeLength, textWidth + sidePadding * 2)
-  const textBlockHeight = settings.fontSize + INDEPENDENT_TEXT_GAP
+  const textBlockHeight =
+    settings.fontSize +
+    INDEPENDENT_TEXT_GAP +
+    (settings.textPosition === 'bottom' ? INDEPENDENT_TEXT_BOTTOM_PADDING : 0)
   const height = baseDimensions.height + textBlockHeight
   const documentNode = source.ownerDocument || document
   const root = documentNode.createElementNS(SVG_NS, 'svg')
