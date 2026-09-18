@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Copy, Lock } from 'lucide-react'
+import { Copy, Lock, Text } from 'lucide-react'
 import { useBarcodeContext } from './BarcodeContext'
 
 import { useTranslations } from 'next-intl'
@@ -27,18 +27,57 @@ import { cn } from '@/lib/utils'
 export const InputComponent: React.FC = () => {
   const t = useTranslations('Barcode')
   const { input, setInput, showText } = useBarcodeContext()
+  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+
+  const insertTextSeparator = (start: number, end: number) => {
+    const textarea = inputRef.current
+    if (!textarea) return
+
+    const newValue = input.slice(0, start) + '\t' + input.slice(end)
+    setInput(newValue)
+
+    requestAnimationFrame(() => {
+      textarea.focus({ preventScroll: true })
+      textarea.setSelectionRange(start + 1, start + 1)
+    })
+  }
+
+  const handleInsertTextSeparator = () => {
+    const textarea = inputRef.current
+    if (!textarea) return
+
+    const isFocused = document.activeElement === textarea
+    const start = isFocused ? textarea.selectionStart : input.length
+    const end = isFocused ? textarea.selectionEnd : input.length
+    insertTextSeparator(start, end)
+  }
+
   return (
     <div className="form-control">
       <label htmlFor="input" className="label">
         <div className="flex justify-between">
-          <span className="label-text text-lg font-semibold">
+          <span className="label-text text-base font-semibold">
             {t('input.title')}
           </span>
-          <span className="label-text-alt flex gap-4">
+          <span className="label-text-alt flex gap-1">
+            <Button
+              size="icon"
+              variant="ghost"
+              type="button"
+              aria-label={t('input.insert-separator')}
+              title={t('input.insert-separator')}
+              onPointerDown={(event) => event.preventDefault()}
+              onClick={handleInsertTextSeparator}
+            >
+              <Text className="h-5 w-5" />
+            </Button>
             <ImportData setInput={setInput} />
             <Button
               size="icon"
               variant="ghost"
+              type="button"
+              aria-label={t('input.copy-input')}
+              title={t('input.copy-input')}
               onClick={() => navigator.clipboard.writeText(input)}
             >
               <Copy className="h-5 w-5" />
@@ -47,6 +86,7 @@ export const InputComponent: React.FC = () => {
         </div>
       </label>
       <Textarea
+        ref={inputRef}
         id="input"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -58,13 +98,7 @@ export const InputComponent: React.FC = () => {
             const el = e.currentTarget
             const start = el.selectionStart ?? 0
             const end = el.selectionEnd ?? 0
-            const newValue = input.slice(0, start) + '\t' + input.slice(end)
-            setInput(newValue)
-            // Restore cursor position after React re-renders
-            requestAnimationFrame(() => {
-              el.selectionStart = start + 1
-              el.selectionEnd = start + 1
-            })
+            insertTextSeparator(start, end)
           }
         }}
       />
@@ -99,7 +133,7 @@ export const OutputComponent: React.FC = () => {
     <div className="form-control flex flex-col">
       <label htmlFor="output" className="label">
         <div className="flex justify-between">
-          <span className="label-text text-lg font-semibold">
+          <span className="label-text text-base font-semibold">
             {t('output.title')}
           </span>
           <span className="label-text-alt flex items-center justify-between gap-4">

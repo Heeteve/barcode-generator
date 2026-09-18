@@ -7,6 +7,9 @@
     "input": {
       "title": "Barcode Values (one per line)",
       "placeholder": "Enter values here, one per line",
+      "copy-input": "Copy input",
+      "insert-separator": "Insert text separator",
+      "import-csv": "Import CSV file",
       "caption-hint": "Press Tab after each value to enter text. Replacement text replaces the native text; independent text keeps it and adds text above or below the barcode. You can also paste two columns from Excel."
     },
     "options": {

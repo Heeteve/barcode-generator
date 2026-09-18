@@ -2,6 +2,7 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Upload } from 'lucide-react'
 import { useCSVReader } from 'react-papaparse'
+import { useTranslations } from 'next-intl'
 // import * as XLSX from 'xlsx'
 
 interface ImportDataProps {
@@ -10,6 +11,7 @@ interface ImportDataProps {
 
 const ImportData: React.FC<ImportDataProps> = ({ setInput }) => {
   const { CSVReader } = useCSVReader()
+  const t = useTranslations('Barcode.input')
 
   const handleCSVImport = (data: any) => {
     const importedData = data.data
@@ -38,16 +40,18 @@ const ImportData: React.FC<ImportDataProps> = ({ setInput }) => {
   //   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center">
       <CSVReader onUploadAccepted={handleCSVImport}>
         {({ getRootProps }: any) => (
-          <div className="flex  items-center ">
+          <div className="flex items-center">
             {/* <span className="text-xs">Import CSV</span> */}
             <Button
               {...getRootProps()}
               size="icon"
               variant="ghost"
-              title="Import CSV"
+              type="button"
+              aria-label={t('import-csv')}
+              title={t('import-csv')}
             >
               <Upload className="h-5 w-5" />
             </Button>
