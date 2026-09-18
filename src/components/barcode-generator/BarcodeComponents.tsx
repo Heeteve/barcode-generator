@@ -144,6 +144,9 @@ export const OptionsComponent: React.FC = () => {
     codeFormat,
   } = useBarcodeContext()
   const t = useTranslations('Barcode')
+  const [textFontSizeInput, setTextFontSizeInput] = React.useState(
+    String(textFontSize),
+  )
 
   // 检查是否是二维码类型
   const isLockHeight = lockHeight(codeFormat)
@@ -154,6 +157,10 @@ export const OptionsComponent: React.FC = () => {
       setBarcodeHeight(barcodeLength)
     }
   }, [barcodeLength, isLockHeight, setBarcodeHeight])
+
+  React.useEffect(() => {
+    setTextFontSizeInput(String(textFontSize))
+  }, [textFontSize])
 
   // 处理宽度变化
   const handleLengthChange = (value: number) => {
@@ -297,13 +304,18 @@ export const OptionsComponent: React.FC = () => {
                   min={8}
                   max={64}
                   step={1}
-                  value={textFontSize}
+                  value={textFontSizeInput}
                   className="bg-white"
-                  onChange={(event) =>
-                    setTextFontSize(
-                      clampBarcodeTextFontSize(Number(event.target.value)),
-                    )
-                  }
+                  onChange={(event) => setTextFontSizeInput(event.target.value)}
+                  onBlur={() => {
+                    const value = textFontSizeInput.trim()
+                    const nextFontSize =
+                      value === ''
+                        ? textFontSize
+                        : clampBarcodeTextFontSize(Number(value))
+                    setTextFontSize(nextFontSize)
+                    setTextFontSizeInput(String(nextFontSize))
+                  }}
                 />
               </div>
               <div>
