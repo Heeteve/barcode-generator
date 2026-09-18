@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { clampBarcodeTextFontSize } from '@/types/barcode-text'
+import { cn } from '@/lib/utils'
 
 export const InputComponent: React.FC = () => {
   const t = useTranslations('Barcode')
@@ -181,7 +182,6 @@ export const OptionsComponent: React.FC = () => {
                 id="showText"
                 checked={showText}
                 onCheckedChange={setShowText}
-                className="border-gray-400"
               />
             </div>
           </div>
@@ -195,17 +195,41 @@ export const OptionsComponent: React.FC = () => {
                 onValueChange={setTextMode}
                 className="grid grid-cols-2 gap-2"
               >
-                <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
+                <label
+                  className={cn(
+                    'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
+                    textMode === 'replacement'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50',
+                  )}
+                >
                   <RadioGroupItem
                     value="replacement"
                     id="textMode-replacement"
+                    className={cn(
+                      textMode === 'replacement'
+                        ? 'border-blue-600 text-blue-600 [&_svg]:fill-blue-600'
+                        : 'border-slate-400 text-slate-500',
+                    )}
                   />
                   <span>{t('options.text-mode-replacement')}</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
+                <label
+                  className={cn(
+                    'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
+                    textMode === 'independent'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50',
+                  )}
+                >
                   <RadioGroupItem
                     value="independent"
                     id="textMode-independent"
+                    className={cn(
+                      textMode === 'independent'
+                        ? 'border-blue-600 text-blue-600 [&_svg]:fill-blue-600'
+                        : 'border-slate-400 text-slate-500',
+                    )}
                   />
                   <span>{t('options.text-mode-independent')}</span>
                 </label>
@@ -223,12 +247,42 @@ export const OptionsComponent: React.FC = () => {
                   onValueChange={setTextPosition}
                   className="mt-2 grid grid-cols-2 gap-2"
                 >
-                  <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
-                    <RadioGroupItem value="top" id="textPosition-top" />
+                  <label
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
+                      textPosition === 'top'
+                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50',
+                    )}
+                  >
+                    <RadioGroupItem
+                      value="top"
+                      id="textPosition-top"
+                      className={cn(
+                        textPosition === 'top'
+                          ? 'border-blue-600 text-blue-600 [&_svg]:fill-blue-600'
+                          : 'border-slate-400 text-slate-500',
+                      )}
+                    />
                     <span>{t('options.text-position-top')}</span>
                   </label>
-                  <label className="flex cursor-pointer items-center gap-2 rounded-md border bg-white px-3 py-2">
-                    <RadioGroupItem value="bottom" id="textPosition-bottom" />
+                  <label
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
+                      textPosition === 'bottom'
+                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50',
+                    )}
+                  >
+                    <RadioGroupItem
+                      value="bottom"
+                      id="textPosition-bottom"
+                      className={cn(
+                        textPosition === 'bottom'
+                          ? 'border-blue-600 text-blue-600 [&_svg]:fill-blue-600'
+                          : 'border-slate-400 text-slate-500',
+                      )}
+                    />
                     <span>{t('options.text-position-bottom')}</span>
                   </label>
                 </RadioGroup>
@@ -280,7 +334,6 @@ export const OptionsComponent: React.FC = () => {
                     id="textBold"
                     checked={textBold}
                     onCheckedChange={setTextBold}
-                    className="border-gray-400"
                   />
                 </div>
                 <div className="flex items-center justify-between rounded-md border bg-white px-3 py-2">
@@ -289,7 +342,6 @@ export const OptionsComponent: React.FC = () => {
                     id="textItalic"
                     checked={textItalic}
                     onCheckedChange={setTextItalic}
-                    className="border-gray-400"
                   />
                 </div>
               </div>
