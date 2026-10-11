@@ -8,6 +8,7 @@ export interface BarcodeTextSettings {
   textMode: BarcodeTextMode
   textPosition: BarcodeTextPosition
   fontSize: number
+  nativeFontSize: number
   fontFamily: BarcodeTextFontFamily
   bold: boolean
   italic: boolean
@@ -17,12 +18,16 @@ export const DEFAULT_BARCODE_TEXT_SETTINGS: BarcodeTextSettings = {
   textMode: 'replacement',
   textPosition: 'bottom',
   fontSize: 15,
+  nativeFontSize: 15,
   fontFamily: 'noto-sans-sc',
   bold: false,
   italic: false,
 }
 
 export const clampBarcodeTextFontSize = (value: number) =>
+  Math.max(8, Math.min(64, Number.isFinite(value) ? Math.round(value) : 15))
+
+export const clampNativeBarcodeTextFontSize = (value: number) =>
   Math.max(8, Math.min(64, Number.isFinite(value) ? Math.round(value) : 15))
 
 export const normalizeBarcodeTextSettings = (
@@ -33,6 +38,9 @@ export const normalizeBarcodeTextSettings = (
   textPosition: settings?.textPosition === 'top' ? 'top' : 'bottom',
   fontSize: clampBarcodeTextFontSize(
     settings?.fontSize ?? DEFAULT_BARCODE_TEXT_SETTINGS.fontSize,
+  ),
+  nativeFontSize: clampNativeBarcodeTextFontSize(
+    settings?.nativeFontSize ?? DEFAULT_BARCODE_TEXT_SETTINGS.nativeFontSize,
   ),
   fontFamily:
     settings?.fontFamily === 'noto-serif-sc' ? 'noto-serif-sc' : 'noto-sans-sc',

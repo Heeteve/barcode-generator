@@ -25,6 +25,7 @@
       "text-position-top": "Above",
       "text-position-bottom": "Below",
       "text-font-size": "Font size (px)",
+      "native-text-font-size": "Native text size (px)",
       "text-font-family": "Font",
       "text-font-noto-sans": "Noto Sans SC",
       "text-font-noto-serif": "Noto Serif SC",

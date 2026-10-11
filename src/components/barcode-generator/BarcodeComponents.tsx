@@ -167,6 +167,8 @@ export const OptionsComponent: React.FC = () => {
     setTextPosition,
     textFontSize,
     setTextFontSize,
+    nativeTextFontSize,
+    setNativeTextFontSize,
     textFontFamily,
     setTextFontFamily,
     textBold,
@@ -180,6 +182,9 @@ export const OptionsComponent: React.FC = () => {
   const t = useTranslations('Barcode')
   const [textFontSizeInput, setTextFontSizeInput] = React.useState(
     String(textFontSize),
+  )
+  const [nativeTextFontSizeInput, setNativeTextFontSizeInput] = React.useState(
+    String(nativeTextFontSize),
   )
 
   // 检查是否是二维码类型
@@ -195,6 +200,10 @@ export const OptionsComponent: React.FC = () => {
   React.useEffect(() => {
     setTextFontSizeInput(String(textFontSize))
   }, [textFontSize])
+
+  React.useEffect(() => {
+    setNativeTextFontSizeInput(String(nativeTextFontSize))
+  }, [nativeTextFontSize])
 
   // 处理宽度变化
   const handleLengthChange = (value: number) => {
@@ -436,6 +445,34 @@ export const OptionsComponent: React.FC = () => {
               onChange={(e) => setBarcodeMargin(Number(e.target.value))}
             />
           </div>
+          {showText && (
+            <div className="md:col-span-1">
+              <Label htmlFor="nativeTextFontSize">
+                {t('options.native-text-font-size')}
+              </Label>
+              <Input
+                id="nativeTextFontSize"
+                type="number"
+                min={8}
+                max={64}
+                step={1}
+                value={nativeTextFontSizeInput}
+                className="bg-white"
+                onChange={(event) =>
+                  setNativeTextFontSizeInput(event.target.value)
+                }
+                onBlur={() => {
+                  const value = nativeTextFontSizeInput.trim()
+                  const nextFontSize =
+                    value === ''
+                      ? nativeTextFontSize
+                      : clampBarcodeTextFontSize(Number(value))
+                  setNativeTextFontSize(nextFontSize)
+                  setNativeTextFontSizeInput(String(nextFontSize))
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

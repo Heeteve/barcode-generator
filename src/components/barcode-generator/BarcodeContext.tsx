@@ -34,6 +34,8 @@ interface BarcodeContextType {
   setTextPosition: (position: BarcodeTextPosition) => void
   textFontSize: number
   setTextFontSize: (fontSize: number) => void
+  nativeTextFontSize: number
+  setNativeTextFontSize: (fontSize: number) => void
   textFontFamily: BarcodeTextFontFamily
   setTextFontFamily: (fontFamily: BarcodeTextFontFamily) => void
   textBold: boolean
@@ -58,6 +60,7 @@ interface FormatSettings {
   textMode: BarcodeTextMode
   textPosition: BarcodeTextPosition
   textFontSize: number
+  nativeTextFontSize: number
   textFontFamily: BarcodeTextFontFamily
   textBold: boolean
   textItalic: boolean
@@ -107,6 +110,7 @@ const DEFAULT_SETTINGS: FormatSettings = {
   textMode: DEFAULT_BARCODE_TEXT_SETTINGS.textMode,
   textPosition: DEFAULT_BARCODE_TEXT_SETTINGS.textPosition,
   textFontSize: DEFAULT_BARCODE_TEXT_SETTINGS.fontSize,
+  nativeTextFontSize: DEFAULT_BARCODE_TEXT_SETTINGS.nativeFontSize,
   textFontFamily: DEFAULT_BARCODE_TEXT_SETTINGS.fontFamily,
   textBold: DEFAULT_BARCODE_TEXT_SETTINGS.bold,
   textItalic: DEFAULT_BARCODE_TEXT_SETTINGS.italic,
@@ -121,6 +125,7 @@ const normalizeFormatSettings = (
     textMode: settings?.textMode,
     textPosition: settings?.textPosition,
     fontSize: settings?.textFontSize,
+    nativeFontSize: settings?.nativeTextFontSize,
     fontFamily: settings?.textFontFamily,
     bold: settings?.textBold,
     italic: settings?.textItalic,
@@ -132,6 +137,7 @@ const normalizeFormatSettings = (
     textMode: textSettings.textMode,
     textPosition: textSettings.textPosition,
     textFontSize: textSettings.fontSize,
+    nativeTextFontSize: textSettings.nativeFontSize,
     textFontFamily: textSettings.fontFamily,
     textBold: textSettings.bold,
     textItalic: textSettings.italic,
@@ -190,6 +196,7 @@ export const BarcodeProvider: React.FC<{
         textMode: DEFAULT_SETTINGS.textMode,
         textPosition: DEFAULT_SETTINGS.textPosition,
         textFontSize: DEFAULT_SETTINGS.textFontSize,
+        nativeTextFontSize: DEFAULT_SETTINGS.nativeTextFontSize,
         textFontFamily: DEFAULT_SETTINGS.textFontFamily,
         textBold: DEFAULT_SETTINGS.textBold,
         textItalic: DEFAULT_SETTINGS.textItalic,
@@ -250,6 +257,9 @@ export const BarcodeProvider: React.FC<{
   const [textFontSize, setTextFontSize] = useState<number>(
     currentSettings.textFontSize,
   )
+  const [nativeTextFontSize, setNativeTextFontSize] = useState<number>(
+    currentSettings.nativeTextFontSize,
+  )
   const [textFontFamily, setTextFontFamily] = useState<BarcodeTextFontFamily>(
     currentSettings.textFontFamily,
   )
@@ -277,6 +287,7 @@ export const BarcodeProvider: React.FC<{
       setTextMode(settings.textMode)
       setTextPosition(settings.textPosition)
       setTextFontSize(settings.textFontSize)
+      setNativeTextFontSize(settings.nativeTextFontSize)
       setTextFontFamily(settings.textFontFamily)
       setTextBold(settings.textBold)
       setTextItalic(settings.textItalic)
@@ -296,6 +307,7 @@ export const BarcodeProvider: React.FC<{
         textMode,
         textPosition,
         textFontSize,
+        nativeTextFontSize,
         textFontFamily,
         textBold,
         textItalic,
@@ -310,6 +322,7 @@ export const BarcodeProvider: React.FC<{
         current.textMode === next.textMode &&
         current.textPosition === next.textPosition &&
         current.textFontSize === next.textFontSize &&
+        current.nativeTextFontSize === next.nativeTextFontSize &&
         current.textFontFamily === next.textFontFamily &&
         current.textBold === next.textBold &&
         current.textItalic === next.textItalic
@@ -331,6 +344,7 @@ export const BarcodeProvider: React.FC<{
     textMode,
     textPosition,
     textFontSize,
+    nativeTextFontSize,
     textFontFamily,
     textBold,
     textItalic,
@@ -367,6 +381,8 @@ export const BarcodeProvider: React.FC<{
       setTextPosition,
       textFontSize,
       setTextFontSize,
+      nativeTextFontSize,
+      setNativeTextFontSize,
       textFontFamily,
       setTextFontFamily,
       textBold,
@@ -391,6 +407,7 @@ export const BarcodeProvider: React.FC<{
       textMode,
       textPosition,
       textFontSize,
+      nativeTextFontSize,
       textFontFamily,
       textBold,
       textItalic,

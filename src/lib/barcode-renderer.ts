@@ -219,7 +219,10 @@ const renderJsBarcode = (
     height: options.barcodeHeight,
     displayValue: options.showText,
     font: FONT_FAMILIES[DEFAULT_BARCODE_TEXT_SETTINGS.fontFamily],
-    fontSize: DEFAULT_NATIVE_FONT_SIZE,
+    fontSize:
+      options.textMode === 'replacement' && customText
+        ? options.fontSize
+        : options.nativeFontSize,
     margin: options.barcodeMargin,
     background: '#ffffff',
     lineColor: '#000000',
@@ -228,7 +231,7 @@ const renderJsBarcode = (
     textMargin: DEFAULT_TEXT_MARGIN,
   }
 
-  if (options.showText && customText) {
+  if (options.showText && options.textMode === 'replacement' && customText) {
     config.text = customText
   }
 
@@ -266,6 +269,7 @@ const renderBwipBarcode = (
     height: heightInMm,
     width: widthInMm,
     includetext: includeNativeText,
+    textsize: (options.nativeFontSize * 10) / DEFAULT_NATIVE_FONT_SIZE,
     padding: marginInMm,
     paddingbottom: marginInMm,
     backgroundcolor: 'ffffff',
@@ -332,7 +336,14 @@ export const renderBarcodeSvg = (options: BarcodeRenderOptions) => {
       renderOptions.textMode === 'replacement'
         ? customText || options.value
         : options.value,
-      { ...DEFAULT_BARCODE_TEXT_SETTINGS, textPosition: 'bottom' },
+      {
+        ...DEFAULT_BARCODE_TEXT_SETTINGS,
+        fontSize:
+          renderOptions.textMode === 'replacement' && customText
+            ? renderOptions.fontSize
+            : renderOptions.nativeFontSize,
+        textPosition: 'bottom',
+      },
     )
   }
 
